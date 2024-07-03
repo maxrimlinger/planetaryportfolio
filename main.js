@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import WebGL from "three/addons/capabilities/WebGL.js";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
-import {createSun, createPlanets, createLighting, getPosAlongOrbit} from "./createObjects.js"
+import {createSun, createPlanets, createLighting, getPosAlongOrbit, createBackground} from "./createObjects.js"
 
 // WebGL compatibility check
 if (!WebGL.isWebGLAvailable()) {
@@ -11,7 +11,7 @@ if (!WebGL.isWebGLAvailable()) {
     const canvas = document.querySelector("#c");
     const renderer = new THREE.WebGLRenderer({antialias: true, canvas});
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 3000);
     camera.position.z = 25;
     new OrbitControls(camera, canvas).enablePan = true;
     
@@ -19,6 +19,7 @@ if (!WebGL.isWebGLAvailable()) {
     const planets = [];
     createPlanets(scene, planets);
     createLighting(scene);
+    createBackground(scene);
 
     function animate(time) {
         const GM = 0.07; // the gravitational pull of the sun

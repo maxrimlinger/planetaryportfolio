@@ -41,7 +41,7 @@ export function createPlanets(scene, planets) {
         const distanceBetweenFoci = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
         const semiMinorAxisLength = Math.sqrt(Math.pow(planet.orbitSemiMajorAxisLength, 2) - Math.pow(distanceBetweenFoci / 2, 2));
         const path = new EllipseCurve(planet.orbitSemiMajorAxisLength, semiMinorAxisLength);
-        const orbitGeometry = new THREE.TubeGeometry(path, 50, 0.15, 8, true);
+        const orbitGeometry = new THREE.TubeGeometry(path, 50, 0.13, 8, true);
         const orbitMesh = new THREE.Mesh(orbitGeometry, orbitMaterial);
 
         // combine orbit and planet into a local space together
@@ -73,4 +73,42 @@ export function createLighting(scene) {
     // sun
     const sunLight = new THREE.PointLight(0xEEEEFF, 100, 200, 1);
     scene.add(sunLight);
+}
+
+export function createBackground(scene) {
+    const ctx = document.createElement("canvas").getContext("2d");
+    const size = 1500;
+    ctx.canvas.width = size;
+    ctx.canvas.height = size;
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    
+    function randInt(min, max) {
+        if (max === undefined) {
+            max = min;
+            min = 0;
+        }
+        return Math.random() * (max - min) + min | 0;
+    }
+    
+    for (let i = 0; i < 100; i++) {
+        ctx.fillStyle = "#FFF";
+        ctx.beginPath();
+        
+        const x = randInt(size);
+        const y = randInt(size);
+        const radius = 1;
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    const boxSize = 1000;
+    const geometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
+    const texture = new THREE.CanvasTexture(ctx.canvas);
+    const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.BackSide
+    })
+    const skybox = new THREE.Mesh(geometry, material);
+    scene.add(skybox);
 }

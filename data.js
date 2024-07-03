@@ -21,7 +21,7 @@ export const planetData = [
         "orbitZRotation": 0
     },
     {
-        "color": 0x687064,
+        "color": 0xb5b5b5,
         "radius": 1.4,
         "orbitFocus": [40, 26, 51],
         "orbitSemiMajorAxisLength": 90,

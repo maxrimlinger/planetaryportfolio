@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import {planetData} from "./data.js";
+import {CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 
-/** Linear parametric equation for ellipse - Does not account for Kepler's Second Law */
+/** Linear parametric equation for ellipse - Does not account for Kepler"s Second Law */
 export function getPosAlongOrbit(t, semiMajorAxisLength, semiMinorAxisLength) {
     const x = -semiMajorAxisLength * Math.cos(t); // the negatives make sure planets speed up at their perihelions
     const y = 0;
@@ -28,7 +29,7 @@ export function createSun(scene) {
 }
 
 export function createPlanets(scene, planets) {
-    const orbitMaterial = new THREE.MeshBasicMaterial({color: 0xe8e8e8});
+    const orbitMaterial = new THREE.MeshBasicMaterial({color: 0xb8b8b8});
     
     for (const planet of planetData) {
         // planet
@@ -41,23 +42,36 @@ export function createPlanets(scene, planets) {
         const distanceBetweenFoci = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
         const semiMinorAxisLength = Math.sqrt(Math.pow(planet.orbitSemiMajorAxisLength, 2) - Math.pow(distanceBetweenFoci / 2, 2));
         const path = new EllipseCurve(planet.orbitSemiMajorAxisLength, semiMinorAxisLength);
-        const orbitGeometry = new THREE.TubeGeometry(path, 50, 0.13, 8, true);
-        const orbitMesh = new THREE.Mesh(orbitGeometry, orbitMaterial);
+        const orbitGeometry = new THREE.TubeGeometry(path, 50, 0.1, 8, true);
+        const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
+
+        // label
+        const labelDiv = document.createElement("div");
+        labelDiv.className = "label";
+        labelDiv.textContent = planet.label;
+        labelDiv.style.backgroundColor = "transparent";
+        const label = new CSS2DObject(labelDiv);
+        label.position.set(1.5 * planet.radius, 0, 0);
+        label.center.set(0, 1);
+        // label.layers.set(1);
 
         // combine orbit and planet into a local space together
-        const planetOrbit = new THREE.Object3D();
-        planetOrbit.add(orbitMesh);
-        planetOrbit.add(planetMesh);
-        planetOrbit.position.x = x / 2;
-        planetOrbit.position.y = y / 2;
-        planetOrbit.position.z = z / 2;
-        planetOrbit.rotation.x = -Math.atan(y / z);
-        planetOrbit.rotation.y = Math.asin(x / distanceBetweenFoci);
-        planetOrbit.rotation.z = THREE.MathUtils.degToRad(planet.orbitZRotation);
-        scene.add(planetOrbit);
+        const root = new THREE.Object3D();
+        const planetLabel = new THREE.Object3D();
+        root.add(orbit);
+        planetLabel.add(planetMesh);
+        planetLabel.add(label);
+        root.add(planetLabel);
+        root.position.x = x / 2;
+        root.position.y = y / 2;
+        root.position.z = z / 2;
+        root.rotation.x = -Math.atan(y / z);
+        root.rotation.y = Math.asin(x / distanceBetweenFoci);
+        root.rotation.z = THREE.MathUtils.degToRad(planet.orbitZRotation);
+        scene.add(root);
         planets.push(
             {
-                "planet": planetMesh,
+                "planet": planetLabel,
                 "semiMajorAxisLength": planet.orbitSemiMajorAxisLength,
                 "semiMinorAxisLength": semiMinorAxisLength,
                 "distanceBetweenFoci": distanceBetweenFoci
@@ -91,7 +105,7 @@ export function createBackground(scene) {
         return Math.random() * (max - min) + min | 0;
     }
     
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 300; i++) {
         ctx.fillStyle = "#FFF";
         ctx.beginPath();
         
@@ -102,7 +116,7 @@ export function createBackground(scene) {
         ctx.fill();
     }
 
-    const boxSize = 1000;
+    const boxSize = 2000;
     const geometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
     const texture = new THREE.CanvasTexture(ctx.canvas);
     const material = new THREE.MeshBasicMaterial({

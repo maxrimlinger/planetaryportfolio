@@ -2,6 +2,7 @@ import * as THREE from "three";
 import WebGL from "three/addons/capabilities/WebGL.js";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 import {createSun, createPlanets, createLighting, getPosAlongOrbit, createBackground} from "./createObjects.js"
+import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
 
 // WebGL compatibility check
 if (!WebGL.isWebGLAvailable()) {
@@ -13,7 +14,14 @@ if (!WebGL.isWebGLAvailable()) {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 3000);
     camera.position.z = 25;
-    new OrbitControls(camera, canvas).enablePan = true;
+
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = "absolute";
+    labelRenderer.domElement.style.top = "0px";
+    document.body.appendChild(labelRenderer.domElement);
+
+    const controls = new OrbitControls(camera, labelRenderer.domElement).enablePan = false;
     
     createSun(scene);
     const planets = [];
@@ -22,7 +30,7 @@ if (!WebGL.isWebGLAvailable()) {
     createBackground(scene);
 
     function animate(time) {
-        const GM = 0.07; // the gravitational pull of the sun
+        const GM = 0.01; // the gravitational pull of the sun
         for (const planet of planets) {
             const meanMotion = Math.sqrt(GM / Math.pow(planet.semiMajorAxisLength, 3));
             const meanAnomaly = meanMotion * time;
@@ -65,6 +73,7 @@ if (!WebGL.isWebGLAvailable()) {
         }
         
         renderer.render(scene, camera);
+        labelRenderer.render(scene, camera);
         requestAnimationFrame(render);
     }
     requestAnimationFrame(render);

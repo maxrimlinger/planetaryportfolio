@@ -5,6 +5,13 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 		<title>Planetary Portfolio</title>
 		<style>
+			@font-face {
+				font-family: 'orbitronmedium';
+				src: url('fonts/orbitron_medium-webfont.woff2') format('woff2'),
+					url('fonts/orbitron_medium-webfont.woff') format('woff');
+				font-weight: normal;
+				font-style: normal;
+			}
 			:root {
 				--text-color: #fff;
 				--text-outline-color: #000;
@@ -20,7 +27,7 @@
 			}
 			.label {
 				color: var(--text-color);
-				font-family: sans-serif;
+				font-family: "orbitronmedium", "sans-serif";
 				padding: 2px;
 				background: rgba( 0, 0, 0, .6 );
 				text-shadow: 2px 0 var(--text-outline-color), -2px 0 var(--text-outline-color), 0 2px var(--text-outline-color), 0 -2px var(--text-outline-color),

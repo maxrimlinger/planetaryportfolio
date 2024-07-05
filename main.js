@@ -12,8 +12,10 @@ if (!WebGL.isWebGLAvailable()) {
     const canvas = document.querySelector("#c");
     const renderer = new THREE.WebGLRenderer({antialias: true, canvas});
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 3000);
-    camera.position.z = 25;
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 4000);
+    camera.position.x = -160;
+    camera.position.y = 80;
+    camera.position.z = -20;
 
     const labelRenderer = new CSS2DRenderer();
     labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -21,7 +23,12 @@ if (!WebGL.isWebGLAvailable()) {
     labelRenderer.domElement.style.top = "0px";
     document.body.appendChild(labelRenderer.domElement);
 
-    const controls = new OrbitControls(camera, labelRenderer.domElement).enablePan = false;
+    const controls = new OrbitControls(camera, labelRenderer.domElement);
+    controls.enablePan = false;
+    controls.enableDamping = true;
+    controls.minDistance = 15;
+    controls.maxDistance = 200;
+    controls.update();
     
     createSun(scene);
     const planets = [];
@@ -71,6 +78,8 @@ if (!WebGL.isWebGLAvailable()) {
             camera.aspect = canvas.clientWidth / canvas.clientHeight;
             camera.updateProjectionMatrix();
         }
+
+        controls.update();
         
         renderer.render(scene, camera);
         labelRenderer.render(scene, camera);

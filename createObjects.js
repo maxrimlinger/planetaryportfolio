@@ -51,8 +51,8 @@ export function createPlanets(scene, planets) {
         labelDiv.textContent = planet.label;
         labelDiv.style.backgroundColor = "transparent";
         const label = new CSS2DObject(labelDiv);
-        label.position.set(1.5 * planet.radius, 0, 0);
-        label.center.set(0, 1);
+        label.position.set(0, -planet.radius - 0.25, 0);
+        label.center.set(0.5, 0);
         // label.layers.set(1);
 
         // combine orbit and planet into a local space together
@@ -116,7 +116,7 @@ export function createBackground(scene) {
         ctx.fill();
     }
 
-    const boxSize = 2000;
+    const boxSize = 5000;
     const geometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
     const texture = new THREE.CanvasTexture(ctx.canvas);
     const material = new THREE.MeshBasicMaterial({

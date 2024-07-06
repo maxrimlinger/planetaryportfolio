@@ -28,22 +28,36 @@ export function createSun(scene) {
     scene.add(sun);
 }
 
-export function createPlanets(scene, planets) {
+export function createPlanets(scene, planets, colliderToObjectMap, pickableObjects) {
     const orbitMaterial = new THREE.MeshBasicMaterial({color: 0xb8b8b8});
+    const colliderMaterial = new THREE.MeshBasicMaterial({color: 0xFFF});
+    const orbitTubeRadius = 0.1;
     
     for (const planet of planetData) {
         // planet
         const planetGeometry = new THREE.SphereGeometry(planet.radius, 20, 20); // TODO calculate detail based on radius. maybe?
         const planetMaterial = new THREE.MeshPhongMaterial({color: planet.color});
         const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
+        const planetColliderGeometry = new THREE.SphereGeometry(planet.radius * 1.4, 20, 20);
+        const planetCollider = new THREE.Mesh(planetColliderGeometry, colliderMaterial);
+        planetCollider.visible = false;
+        planetMesh.add(planetCollider);
+        colliderToObjectMap[planetCollider.id] = {"type": "planet", "object": planetMesh};
+        pickableObjects.push(planetCollider);
         
         // orbit
         const [x, y, z] = planet.orbitFocus;
         const distanceBetweenFoci = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
         const semiMinorAxisLength = Math.sqrt(Math.pow(planet.orbitSemiMajorAxisLength, 2) - Math.pow(distanceBetweenFoci / 2, 2));
         const path = new EllipseCurve(planet.orbitSemiMajorAxisLength, semiMinorAxisLength);
-        const orbitGeometry = new THREE.TubeGeometry(path, 50, 0.1, 8, true);
+        const orbitGeometry = new THREE.TubeGeometry(path, 50, orbitTubeRadius, 8, true);
         const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
+        const orbitColliderGeometry = new THREE.TubeGeometry(path, 50, orbitTubeRadius * 10, 8, true);
+        const orbitCollider = new THREE.Mesh(orbitColliderGeometry, colliderMaterial);
+        orbitCollider.visible = false;
+        orbit.add(orbitCollider);
+        colliderToObjectMap[orbitCollider.id] = {"type": "orbit", "object": orbit};
+        pickableObjects.push(orbitCollider);
 
         // label
         const labelDiv = document.createElement("div");

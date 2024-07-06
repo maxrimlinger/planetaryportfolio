@@ -8,7 +8,6 @@ import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
 if (!WebGL.isWebGLAvailable()) {
     // TODO give them my resume instead
 } else {
-    // initialization
     const canvas = document.querySelector("#c");
     const renderer = new THREE.WebGLRenderer({antialias: true, canvas});
     const scene = new THREE.Scene();
@@ -29,10 +28,73 @@ if (!WebGL.isWebGLAvailable()) {
     controls.minDistance = 15;
     controls.maxDistance = 200;
     controls.update();
+
+    // picking objects
+    const colliderToObjectMap = {};
+    const raycaster = new THREE.Raycaster();
+    raycaster.far = 1000;
+    let pickedObject = null;
+    const pickPosition = {x: 0, y: 0};
+    const pickableObjects = [];
+    function pick(normalizedPosition, scene, camera) {
+        if (pickedObject) {
+            pickedObject.scale.set(1,1,1);
+        }
+        raycaster.setFromCamera(normalizedPosition, camera);
+        const intersectedObjects = raycaster.intersectObjects(pickableObjects);
+        if (intersectedObjects.length) {
+            // pick the first object that the ray hit
+            const pickedCollider = intersectedObjects[0].object;
+            if (Object.hasOwn(colliderToObjectMap, pickedCollider.id)) {
+                const type = colliderToObjectMap[pickedCollider.id].type;
+                pickedObject = colliderToObjectMap[pickedCollider.id].object;
+                if (type == "orbit") {
+                    pickedObject.scale.set(2,2,2);
+                } else if (type == "planet") {
+                    pickedObject.scale.set(2, 3, 2);
+                }
+            }
+        }
+    }
+    function getCanvasRelativePosition(event) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: (event.clientX - rect.left) * canvas.width  / rect.width,
+            y: (event.clientY - rect.top ) * canvas.height / rect.height,
+        };
+    }
+    function setPickPosition(event) {
+        const pos = getCanvasRelativePosition(event);
+        pickPosition.x = (pos.x / canvas.width ) *  2 - 1;
+        pickPosition.y = (pos.y / canvas.height) * -2 + 1;  // note we flip Y
+    }
+    function clearPickPosition() {
+        // unlike the mouse which always has a position
+        // if the user stops touching the screen we want
+        // to stop picking. For now we just pick a value
+        // unlikely to pick something
+        pickPosition.x = -100000;
+        pickPosition.y = -100000;
+    }
+    window.addEventListener('mousemove', setPickPosition);
+    window.addEventListener('mouseout', clearPickPosition);
+    window.addEventListener('mouseleave', clearPickPosition);
+    // mobile support
+    window.addEventListener('touchstart', (event) => {
+        // prevent the window from scrolling
+        event.preventDefault();
+        setPickPosition(event.touches[0]);
+    }, {passive: false});
+    window.addEventListener('touchmove', (event) => {
+        setPickPosition(event.touches[0]);
+    });
+    window.addEventListener('touchend', clearPickPosition);
+    clearPickPosition();
     
+    // populate scene
     createSun(scene);
     const planets = [];
-    createPlanets(scene, planets);
+    createPlanets(scene, planets, colliderToObjectMap, pickableObjects);
     createLighting(scene);
     createBackground(scene);
 
@@ -80,6 +142,7 @@ if (!WebGL.isWebGLAvailable()) {
         }
 
         controls.update();
+        pick(pickPosition, scene, camera, time);
         
         renderer.render(scene, camera);
         labelRenderer.render(scene, camera);

@@ -36,8 +36,8 @@ if (!WebGL.isWebGLAvailable()) {
     let pickedObject = null;
     const pickPosition = {x: 0, y: 0};
     const pickableObjects = [];
-    function pick(normalizedPosition, scene, camera) {
-        if (pickedObject) {
+    function pick(normalizedPosition, camera) {
+        if (pickedObject) { // reset effect
             pickedObject.scale.set(1,1,1);
         }
         raycaster.setFromCamera(normalizedPosition, camera);
@@ -49,7 +49,7 @@ if (!WebGL.isWebGLAvailable()) {
                 const type = colliderToObjectMap[pickedCollider.id].type;
                 pickedObject = colliderToObjectMap[pickedCollider.id].object;
                 if (type == "orbit") {
-                    pickedObject.scale.set(2,2,2);
+                    pickedObject.scale.set(2, 2, 2);
                 } else if (type == "planet") {
                     pickedObject.scale.set(2, 3, 2);
                 }
@@ -122,13 +122,14 @@ if (!WebGL.isWebGLAvailable()) {
         }
     }
 
-    function resizeRendererToDisplaySize(renderer) {
+    function resizeRendererToDisplaySize(renderer, labelRenderer) {
         const canvas = renderer.domElement;
         const width = canvas.clientWidth;
         const height = canvas.clientHeight;
         const needResize = canvas.width !== width || canvas.height !== height;
         if (needResize) {
             renderer.setSize(width, height, false);
+            labelRenderer.setSize(width, height, false);
         }
         return needResize;
     }
@@ -136,13 +137,13 @@ if (!WebGL.isWebGLAvailable()) {
     function render(time) {
         animate(time);
         
-        if (resizeRendererToDisplaySize(renderer)) {
+        if (resizeRendererToDisplaySize(renderer, labelRenderer)) {
             camera.aspect = canvas.clientWidth / canvas.clientHeight;
             camera.updateProjectionMatrix();
         }
 
         controls.update();
-        pick(pickPosition, scene, camera, time);
+        pick(pickPosition, camera);
         
         renderer.render(scene, camera);
         labelRenderer.render(scene, camera);

@@ -38,7 +38,7 @@ export function createPlanets(scene, planets, colliderToObjectMap, pickableObjec
         const planetGeometry = new THREE.SphereGeometry(planet.radius, 20, 20); // TODO calculate detail based on radius. maybe?
         const planetMaterial = new THREE.MeshPhongMaterial({color: planet.color});
         const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
-        const planetColliderGeometry = new THREE.SphereGeometry(planet.radius * 1.4, 20, 20);
+        const planetColliderGeometry = new THREE.SphereGeometry(planet.radius * 1.8, 20, 20);
         const planetCollider = new THREE.Mesh(planetColliderGeometry, colliderMaterial);
         planetCollider.visible = false;
         planetMesh.add(planetCollider);
@@ -64,10 +64,14 @@ export function createPlanets(scene, planets, colliderToObjectMap, pickableObjec
         labelDiv.className = "label";
         labelDiv.textContent = planet.label;
         labelDiv.style.backgroundColor = "transparent";
+        labelDiv.addEventListener("mouseover", () => {
+            labelPick(planetMesh);
+        });
         const label = new CSS2DObject(labelDiv);
         label.position.set(0, -planet.radius - 0.25, 0);
         label.center.set(0.5, 0);
-        // label.layers.set(1);
+        // const labelColliderGeometry = new THREE.PlaneGeometry()
+        // const labelCollider = new THREE.Mesh();
 
         // combine orbit and planet into a local space together
         const root = new THREE.Object3D();

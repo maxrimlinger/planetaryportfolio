@@ -7,6 +7,8 @@ export class Picker {
     colliderToObjectMap = {};
     pickableObjects = [];
     pickedObject = null;
+    pickedObjectType = null;
+    labelPicked = false;
     pos = {x: -100000, y: -100000};
 
     constructor(canvas, camera) {
@@ -37,10 +39,25 @@ export class Picker {
         this.pos.x = -100000;
         this.pos.y = -100000;
     }
+
+    addEffect() {
+        if (this.pickedObjectType == "orbit") {
+            this.pickedObject.scale.set(2, 2, 2);
+        } else if (this.pickedObjectType == "planet") {
+            this.pickedObject.scale.set(2, 3, 2);
+        }
+    }
+
+    resetEffect() {
+        this.pickedObject.scale.set(1,1,1);
+    }
     
     pick() {
-        if (this.pickedObject) { // reset effect
-            this.pickedObject.scale.set(1,1,1);
+        if (this.labelPicked) {
+            return
+        }
+        if (this.pickedObject) {
+            this.resetEffect()
         }
         this.raycaster.setFromCamera(this.pos, this.camera);
         const intersectedObjects = this.raycaster.intersectObjects(this.pickableObjects);
@@ -48,18 +65,21 @@ export class Picker {
             // pick the first object that the ray hit
             const pickedCollider = intersectedObjects[0].object;
             if (Object.hasOwn(this.colliderToObjectMap, pickedCollider.id)) {
-                const type = this.colliderToObjectMap[pickedCollider.id].type;
+                this.pickedObjectType = this.colliderToObjectMap[pickedCollider.id].type;
                 this.pickedObject = this.colliderToObjectMap[pickedCollider.id].object;
-                if (type == "orbit") {
-                    this.pickedObject.scale.set(2, 2, 2);
-                } else if (type == "planet") {
-                    this.pickedObject.scale.set(2, 3, 2);
-                }
+                this.addEffect()
             }
         }
     }
 
-    addEventListeners(window) {
+    labelPick(selectedObject) {
+        this.labelPicked = true;
+        this.pickedObjectType = "planet";
+        this.pickedObject = selectedObject;
+        this.addEffect();
+    }
+
+    addWindowEventListeners(window) {
         window.addEventListener('mousemove', this.setPos.bind(this));
         window.addEventListener('mouseout', this.clearPos.bind(this));
         window.addEventListener('mouseleave', this.clearPos.bind(this));
@@ -73,5 +93,20 @@ export class Picker {
             this.setPos(event.touches[0]).bind(this);
         });
         window.addEventListener('touchend', this.clearPos.bind(this));
+    }
+
+    addLabelEventListeners(label, planet) {
+        label.addEventListener("mouseenter", () => {this.labelPick(planet)});
+        label.addEventListener("mouseleave", () => this.labelPicked = false);
+        // mobile support
+        window.addEventListener('touchstart', (event) => {
+            // prevent the window from scrolling
+            event.preventDefault();
+            this.labelPick(planet);
+        }, {passive: false});
+        window.addEventListener('touchmove', () => {
+            this.labelPick(planet);
+        });
+        window.addEventListener('touchend', () => this.labelPicked = false);
     }
 }

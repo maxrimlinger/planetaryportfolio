@@ -31,12 +31,12 @@ if (!WebGL.isWebGLAvailable()) {
     controls.update();
 
     const picker = new Picker(canvas, camera);
-    picker.addEventListeners(window);
+    picker.addWindowEventListeners(window);
 
     // populate scene
     createSun(scene);
     const planets = [];
-    createPlanets(scene, planets, picker.colliderToObjectMap, picker.pickableObjects);
+    createPlanets(scene, planets, picker);
     createLighting(scene);
     createBackground(scene);
 

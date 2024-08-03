@@ -28,9 +28,9 @@ export function createSun(scene) {
     scene.add(sun);
 }
 
-export function createPlanets(scene, planets, colliderToObjectMap, pickableObjects) {
+export function createPlanets(scene, planets, picker) {
     const orbitMaterial = new THREE.MeshBasicMaterial({color: 0xb8b8b8});
-    const colliderMaterial = new THREE.MeshBasicMaterial({color: 0xFFF});
+    const colliderMaterial = new THREE.MeshBasicMaterial({color: 0xFFFFFF, opacity: 0.3});
     const orbitTubeRadius = 0.1;
     
     for (const planet of planetData) {
@@ -38,12 +38,13 @@ export function createPlanets(scene, planets, colliderToObjectMap, pickableObjec
         const planetGeometry = new THREE.SphereGeometry(planet.radius, 20, 20); // TODO calculate detail based on radius. maybe?
         const planetMaterial = new THREE.MeshPhongMaterial({color: planet.color});
         const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
+        // collider
         const planetColliderGeometry = new THREE.SphereGeometry(planet.radius * 1.8, 20, 20);
         const planetCollider = new THREE.Mesh(planetColliderGeometry, colliderMaterial);
         planetCollider.visible = false;
         planetMesh.add(planetCollider);
-        colliderToObjectMap[planetCollider.id] = {"type": "planet", "object": planetMesh};
-        pickableObjects.push(planetCollider);
+        picker.colliderToObjectMap[planetCollider.id] = {"type": "planet", "object": planetMesh};
+        picker.pickableObjects.push(planetCollider);
         
         // orbit
         const [x, y, z] = planet.orbitFocus;
@@ -56,22 +57,18 @@ export function createPlanets(scene, planets, colliderToObjectMap, pickableObjec
         const orbitCollider = new THREE.Mesh(orbitColliderGeometry, colliderMaterial);
         orbitCollider.visible = false;
         orbit.add(orbitCollider);
-        colliderToObjectMap[orbitCollider.id] = {"type": "orbit", "object": orbit};
-        pickableObjects.push(orbitCollider);
+        picker.colliderToObjectMap[orbitCollider.id] = {"type": "orbit", "object": orbit};
+        picker.pickableObjects.push(orbitCollider);
 
         // label
         const labelDiv = document.createElement("div");
         labelDiv.className = "label";
         labelDiv.textContent = planet.label;
         labelDiv.style.backgroundColor = "transparent";
-        labelDiv.addEventListener("mouseover", () => {
-            labelPick(planetMesh);
-        });
+        picker.addLabelEventListeners(labelDiv, planetMesh);
         const label = new CSS2DObject(labelDiv);
         label.position.set(0, -planet.radius - 0.25, 0);
         label.center.set(0.5, 0);
-        // const labelColliderGeometry = new THREE.PlaneGeometry()
-        // const labelCollider = new THREE.Mesh();
 
         // combine orbit and planet into a local space together
         const root = new THREE.Object3D();

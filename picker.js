@@ -42,14 +42,18 @@ export class Picker {
 
     addEffect() {
         if (this.pickedObjectType == "orbit") {
-            this.pickedObject.scale.set(2, 2, 2);
+            this.pickedObject.material.color.set(0xFFFFFF);
         } else if (this.pickedObjectType == "planet") {
             this.pickedObject.scale.set(2, 3, 2);
         }
     }
 
     resetEffect() {
-        this.pickedObject.scale.set(1,1,1);
+        if (this.pickedObjectType == "orbit") {
+            this.pickedObject.material.color.set(0xb8b8b8);
+        } else {
+            this.pickedObject.scale.set(1,1,1);
+        }
     }
     
     pick() {

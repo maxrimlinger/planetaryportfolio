@@ -41,11 +41,11 @@ export class Picker {
     }
 
     addEffect() {
-        if (this.pickedObjectType == "orbit") {
-            this.pickedObject.material.color.set(0xFFFFFF);
-        } else if (this.pickedObjectType == "planet") {
-            this.pickedObject.scale.set(2, 3, 2);
-        }
+        // if (this.pickedObjectType == "orbit") {
+        //     this.pickedObject.material.color.set(0xFFFFFF);
+        // } else if (this.pickedObjectType == "planet") {
+        //     this.pickedObject.scale.set(2, 3, 2);
+        // }
     }
 
     resetEffect() {

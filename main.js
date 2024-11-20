@@ -34,13 +34,15 @@ if (!WebGL.isWebGLAvailable()) {
     picker.addWindowEventListeners(window);
 
     // populate scene
-    createSun(scene);
-    const planets = [];
-    createPlanets(scene, planets, picker);
+    // createSun(scene);
+    const [planets, glows] = createPlanets(scene, picker, camera);
     createLighting(scene);
     createBackground(scene);
+    const axesHelper = new THREE.AxesHelper( 5 ); // REMOVEME
+    scene.add( axesHelper );
 
     function animate(time) {
+        // motion
         const GM = 0.01; // the gravitational pull of the sun
         for (const planet of planets) {
             const meanMotion = Math.sqrt(GM / Math.pow(planet.semiMajorAxisLength, 3));
@@ -61,6 +63,16 @@ if (!WebGL.isWebGLAvailable()) {
             planet.planet.position.x = position.z; // In all honesty, I do not know why z and x need to be flipped.
             planet.planet.position.y = position.y; 
             planet.planet.position.z = position.x; 
+
+            // shaders
+            if (planet == planets[0]) {
+                const glowMesh = planet.planet.children[0].children[1];
+                const camPos = new THREE.Vector3(-camera.position.z, camera.position.y, camera.position.x);
+                const planPos = new THREE.Vector3(-planet.planet.position.z, planet.planet.position.y, planet.planet.position.x);
+                const vec = new THREE.Vector3().subVectors(camPos, planPos);
+                console.log(camera.position, planet.planet.position, vec);
+                glowMesh.material.uniforms.viewVector.value = vec;
+            }
         }
     }
 

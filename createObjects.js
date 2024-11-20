@@ -28,10 +28,26 @@ export function createSun(scene) {
     scene.add(sun);
 }
 
-export function createPlanets(scene, planets, picker) {
+export function createPlanets(scene, picker, camera) {
+    const planets = [];
+    const glows = [];
     const orbitMaterial = new THREE.MeshBasicMaterial({color: 0xb8b8b8});
     const colliderMaterial = new THREE.MeshBasicMaterial({color: 0xFFFFFF, opacity: 0.3});
     const orbitTubeRadius = 0.1;
+    const glowMaterial = new THREE.ShaderMaterial({
+	    uniforms: 
+		{ 
+			"c":   { type: "f", value: 0.3 },
+			"p":   { type: "f", value: 4.0 },
+			glowColor: { type: "c", value: new THREE.Color(0xffff00) },
+			viewVector: { type: "v3", value: 0 }
+		},
+		vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
+		fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+		side: THREE.BackSide,
+		blending: THREE.AdditiveBlending,
+		transparent: true
+	});
     
     for (const planet of planetData) {
         // planet
@@ -45,6 +61,11 @@ export function createPlanets(scene, planets, picker) {
         planetMesh.add(planetCollider);
         picker.colliderToObjectMap[planetCollider.id] = {"type": "planet", "object": planetMesh};
         picker.pickableObjects.push(planetCollider);
+        // glow effect
+        const planetGlowGeometry = new THREE.SphereGeometry(planet.radius + 1, 20, 20);
+        const planetGlow = new THREE.Mesh(planetGlowGeometry, glowMaterial);
+        planetMesh.add(planetGlow);
+        glows.push(planetGlow)
         
         // orbit
         const [x, y, z] = planet.orbitFocus;
@@ -93,6 +114,7 @@ export function createPlanets(scene, planets, picker) {
             }
         );
     }
+    return [planets, glows];
 }
 
 export function createLighting(scene) {
